@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: Li
+    given-names: Yiang
+    orcid: https://orcid.org/0000-0001-7811-4321
+title: "Replication Codes - How does sibship affect later life's cognitive health: Evidence from Health and Retirement Study linked to 1940 U.S. Census"
+version: 2.0.4
+date-released: 2023-04-11

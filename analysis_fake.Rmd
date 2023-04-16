@@ -1,0 +1,160 @@
+---
+title: "analysis_fake"
+author: "Yiang Li"
+date: '2023-04-11'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r library}
+library(lavaan)
+library(MatchIt)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r read data}
+fake_dat = read.csv("fake_data.csv")
+```
+
+
+```{r matching}
+fake_dat_match = matchit(has_sibs ~ region + urban + valueh + dwsize + farm + ownership + rent,
+                         method = "nearest", distance = "glm",
+                         replace = F, ratio = 1,
+                         data = fake_dat)
+
+fake_dat_matched = match.data(fake_dat_match)
+fake_dat_match_close = fake_dat[fake_dat_matched$age_difference <=5 | is.na(fake_dat_matched$age_difference),]
+
+```
+
+```{r baseline}
+model_tics = '
+intercept = ~ 1*tics02 + 1*tics04 + 1*tics06 + 1*tics08 + 1*tics10 + 1*tics12 + 1*tics14 + 1*tics16
+
+slope = ~ 0*tics02 + 1*tics04 + 2*tics06 + 3*tics08 + 4*tics10 + 5*tics12 + 6*tics14 + 7*tics16
+
+intercept ~ has_sibs + age_recode + age_squared
+
+slope ~ has_sibs
+
+'
+lgc_tics = growth(model_tics, data = fake_dat)
+
+summary(lgc_tics, fit.measures = TRUE)
+
+```
+
+```{r control}
+model_tics = '
+intercept = ~ 1*tics02 + 1*tics04 + 1*tics06 + 1*tics08 + 1*tics10 + 1*tics12 + 1*tics14 + 1*tics16
+
+slope = ~ 0*tics02 + 1*tics04 + 2*tics06 + 3*tics08 + 4*tics10 + 5*tics12 + 6*tics14 + 7*tics16
+
+intercept ~ has_sibs + age_recode + age_squared + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+slope ~ has_sibs + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+tics02 ~ srh02 + stroke02 + rel02
+tics04 ~ srh04 + stroke04 + rel04
+tics06 ~ srh06 + stroke06 + rel06
+tics08 ~ srh08 + stroke08 + rel08
+tics10 ~ srh10 + stroke10 + rel10
+tics12 ~ srh12 + stroke12 + rel12
+tics14 ~ srh14 + stroke14 + rel14
+tics16 ~ srh16 + stroke16 + rel16
+
+'
+
+lgc_tics = growth(model_tics, data = fake_dat)
+
+summary(lgc_tics, fit.measures = TRUE )
+```
+
+```{r match}
+model_tics = '
+intercept = ~ 1*tics02 + 1*tics04 + 1*tics06 + 1*tics08 + 1*tics10 + 1*tics12 + 1*tics14 + 1*tics16
+
+slope = ~ 0*tics02 + 1*tics04 + 2*tics06 + 3*tics08 + 4*tics10 + 5*tics12 + 6*tics14 + 7*tics16
+
+intercept ~ has_sibs + age_recode + age_squared + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+slope ~ has_sibs + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+tics02 ~ srh02 + stroke02 + rel02
+tics04 ~ srh04 + stroke04 + rel04
+tics06 ~ srh06 + stroke06 + rel06
+tics08 ~ srh08 + stroke08 + rel08
+tics10 ~ srh10 + stroke10 + rel10
+tics12 ~ srh12 + stroke12 + rel12
+tics14 ~ srh14 + stroke14 + rel14
+tics16 ~ srh16 + stroke16 + rel16
+
+'
+
+lgc_tics = growth(model_tics, data = fake_dat_matched)
+
+summary(lgc_tics, fit.measures = TRUE )
+```
+
+```{r match close}
+
+model_tics = '
+intercept = ~ 1*tics02 + 1*tics04 + 1*tics06 + 1*tics08 + 1*tics10 + 1*tics12 + 1*tics14 + 1*tics16
+
+slope = ~ 0*tics02 + 1*tics04 + 2*tics06 + 3*tics08 + 4*tics10 + 5*tics12 + 6*tics14 + 7*tics16
+
+intercept ~ has_sibs + age_recode + age_squared + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+slope ~ has_sibs + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+tics02 ~ srh02 + stroke02 + rel02
+tics04 ~ srh04 + stroke04 + rel04
+tics06 ~ srh06 + stroke06 + rel06
+tics08 ~ srh08 + stroke08 + rel08
+tics10 ~ srh10 + stroke10 + rel10
+tics12 ~ srh12 + stroke12 + rel12
+tics14 ~ srh14 + stroke14 + rel14
+tics16 ~ srh16 + stroke16 + rel16
+
+'
+
+lgc_tics = growth(model_tics, data = fake_dat_match_close)
+
+summary(lgc_tics, fit.measures = TRUE )
+
+```
+
+```{r match close}
+
+model_tics = '
+intercept = ~ 1*tics02 + 1*tics04 + 1*tics06 + 1*tics08 + 1*tics10 + 1*tics12 + 1*tics14 + 1*tics16
+
+slope = ~ 0*tics02 + 1*tics04 + 2*tics06 + 3*tics08 + 4*tics10 + 5*tics12 + 6*tics14 + 7*tics16
+
+intercept ~ nsibs + age_recode + age_squared + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+slope ~ nsibs + multgen_recode2 + sex_male + age_squared + race_white + eth_hispan + educ_yr + age_recode : multgen_recode2 + age_recode : sex_male + age_recode : race_white + age_recode : eth_hispan + age_recode : educ_yr
+
+tics02 ~ srh02 + stroke02 + rel02
+tics04 ~ srh04 + stroke04 + rel04
+tics06 ~ srh06 + stroke06 + rel06
+tics08 ~ srh08 + stroke08 + rel08
+tics10 ~ srh10 + stroke10 + rel10
+tics12 ~ srh12 + stroke12 + rel12
+tics14 ~ srh14 + stroke14 + rel14
+tics16 ~ srh16 + stroke16 + rel16
+
+'
+
+lgc_tics = growth(model_tics, data = fake_dat_match_close)
+
+summary(lgc_tics, fit.measures = TRUE )
+
+```
+
